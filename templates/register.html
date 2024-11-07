@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+
+    <!-- Form Container -->
+    <div class="w-full max-w-md bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-center">Register</h1>
+
+        <!-- Messages Section -->
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <p class="text-sm text-center bg-blue-700 text-blue-100 py-2 px-3 rounded mb-2">{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'register' %}" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Username Field -->
+            <div>
+                <label for="username" class="block text-lg font-semibold mb-2">Username</label>
+                <input type="text" id="username" name="username" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Your username">
+            </div>
+
+            <!-- Email Field -->
+            <div>
+                <label for="email" class="block text-lg font-semibold mb-2">Email</label>
+                <input type="email" id="email" name="email" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Your email">
+            </div>
+
+            <!-- Year of Birth Field -->
+            <div>
+                <label for="year_of_birth" class="block text-lg font-semibold mb-2">Year of Birth</label>
+                <input type="number" id="year_of_birth" name="year_of_birth" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="YYYY">
+            </div>
+
+            <!-- Password Field -->
+            <div>
+                <label for="password" class="block text-lg font-semibold mb-2">Password</label>
+                <input type="password" id="password" name="password" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Your password">
+            </div>
+
+            <!-- Confirm Password Field -->
+            <div>
+                <label for="confirm_password" class="block text-lg font-semibold mb-2">Confirm Password</label>
+                <input type="password" id="confirm_password" name="confirm_password" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Confirm password">
+            </div>
+
+            <!-- Terms and Conditions -->
+            <div class="flex items-center space-x-2">
+                <input type="checkbox" id="terms_accepted" name="terms_accepted" required
+                    class="text-blue-500 border-gray-600 focus:ring-blue-500">
+                <label for="terms_accepted" class="text-sm">I accept the terms and conditions</label>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Register
+            </button>
+        </form>
+
+        <!-- Login Link -->
+        <p class="text-center text-sm mt-6">
+            Already have an account? 
+            <a href="{% url 'login' %}" class="text-blue-400 hover:text-blue-300 underline">Login here</a>.
+        </p>
+    </div>
+
+</body>
+</html>
+
+

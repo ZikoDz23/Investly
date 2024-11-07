@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Wallet</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+
+    <!-- Form Container -->
+    <div class="w-full max-w-md bg-gray-800 rounded-lg p-6 shadow-lg">
+        <h1 class="text-2xl font-bold mb-6 text-center">Import Wallet</h1>
+
+        <form method="post" action="{% url 'import_wallet' %}" class="space-y-6">
+            {% csrf_token %}
+
+            <!-- Private Key Input -->
+            <div>
+                <label for="private_key" class="block text-lg font-semibold mb-2">Enter Private Key</label>
+                <input type="text" id="private_key" name="private_key" required
+                    class="w-full p-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Your private key">
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit"
+                class="w-full bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-blue-300">
+                Import
+            </button>
+        </form>
+    </div>
+
+</body>
+</html>
