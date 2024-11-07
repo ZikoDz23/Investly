@@ -1,0 +1,53 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ name }} Balance</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex justify-between">
+
+  <!-- Header Component: Return and Home Icons -->
+  <header class="w-full max-w-md mx-auto flex items-center justify-between px-4 py-6 mb-4 fixed top-0">
+    <!-- Return Button (Back Icon) -->
+    <button onclick="history.back()" class="text-white hover:text-white flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+</header>
+
+    <!-- Main Content (Asset Card) -->
+    <main class="flex-grow pt-20 px-4">
+        <!-- Balance Card -->
+        <div class="bg-gray-800 rounded-lg p-6 text-center shadow-md max-w-md mx-auto mt-4">
+            <h2 class="text-2xl font-bold mb-2">{{ name }} Balance</h2>
+            <p class="text-3xl font-semibold text-green-400 mt-2">${{ usd_value }}</p>
+
+            <!-- Balance Details -->
+            <div class="balance-info my-6">
+                <p class="text-gray-400 text-lg">Balance: <span class="text-white font-medium">{{ balance }}</span></p>
+                <p class="text-gray-400 text-lg">Equivalent in USD: <span class="text-green-400 font-medium">${{ usd_value }}</span></p>
+            </div>
+            
+            <!-- Actions: Send and Receive Buttons -->
+            <div class="flex justify-center space-x-4">
+                <a href="{% url 'send_asset' name|lower %}" 
+                   class="w-32 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                   Send {{ name }}
+                </a>
+                
+                <a href="{% url 'select_network' %}" 
+                   class="w-32 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                   Receive
+                </a>
+            </div>
+        </div>
+    </main>
+
+    
+
+</body>
+</html>

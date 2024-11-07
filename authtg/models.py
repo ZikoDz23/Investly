@@ -6,6 +6,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     wallet_address = models.CharField(max_length=255, blank=True, null=True)  # Store wallet address
     private_key_encrypted = models.TextField(blank=True, null=True)  # Store encrypted private key
+    eth_address = models.CharField(max_length=255, blank=True, null=True)  # Ethereum address
+    tron_address = models.CharField(max_length=255, blank=True, null=True)
 
     def __str__(self):
         return self.user.username

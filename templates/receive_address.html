@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receive {{ network }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.0.3/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center px-4">
+    <!-- Header Component: Return and Home Icons -->
+   <header class="w-full max-w-md mx-auto flex items-center justify-between px-4 py-6 mb-4 fixed top-0">
+    <!-- Return Button (Back Icon) -->
+    <button onclick="history.back()" class="text-white hover:text-white flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+    </header>
+
+    <!-- Header -->
+    <div class="w-full max-w-md text-center mb-4">
+        
+        <h1 class="text-xl font-semibold text-white">Receive {{ network }}</h1>
+        
+    </div>
+
+    <!-- Warning Banner -->
+    <div class="bg-yellow-500 text-black text-sm px-4 py-2 rounded-lg max-w-md text-center mb-6">
+        <p><span class="font-semibold">Send only {{ network }}</span> to this address. Sending other assets may result in loss.</p>
+    </div>
+
+    <!-- QR Code and Address Section -->
+    <div class="flex flex-col items-center max-w-md bg-gray-800 p-6 rounded-lg shadow-md">
+        <!-- QR Code Placeholder -->
+        <div class="bg-white p-4 rounded-lg mb-4">
+            <img src="data:image/png;base64,{{ qr_code_base64 }}" alt="QR Code for {{ network }}" class="w-40 h-40">
+        </div>
+
+        <!-- Address Label -->
+        <p class="text-gray-400 text-sm font-mono text-center mb-2">Address:</p>
+        <p class="text-gray-300 text-sm font-mono text-center mb-6">{{ address }}</p>
+
+        <!-- Action Buttons -->
+        <div class="flex justify-around w-full space-x-4">
+            <div class="flex flex-col items-center text-center">
+                <button onclick="copyToClipboard('{{ address }}')" class="bg-gray-700 p-2 rounded-full text-gray-300 hover:text-white hover:bg-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h18M3 21h18m-2-7l-3 3m0 0l-3-3m3 3V4" />
+                    </svg>
+                </button>
+                <span class="text-gray-400 text-xs mt-2">Copy</span>
+            </div>
+            <div class="flex flex-col items-center text-center">
+                <button onclick="setAmount()" class="bg-gray-700 p-2 rounded-full text-gray-300 hover:text-white hover:bg-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m2 6H7a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v10a2 2 0 01-2 2z" />
+                    </svg>
+                </button>
+                <span class="text-gray-400 text-xs mt-2">Set Amount</span>
+            </div>
+            <div class="flex flex-col items-center text-center">
+                <button onclick="shareAddress()" class="bg-gray-700 p-2 rounded-full text-gray-300 hover:text-white hover:bg-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </button>
+                <span class="text-gray-400 text-xs mt-2">Share</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Functions -->
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Address copied to clipboard!");
+            });
+        }
+
+        function setAmount() {
+            alert("Set amount functionality to be implemented.");
+        }
+
+        function shareAddress() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Receive {{ network }}',
+                    text: 'Here is my {{ network }} address: {{ address }}',
+                    url: window.location.href
+                }).then(() => {
+                    console.log('Thanks for sharing!');
+                }).catch(console.error);
+            } else {
+                alert("Share feature is not supported in this browser.");
+            }
+        }
+    </script>
+
+</body>
+</html>

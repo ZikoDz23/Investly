@@ -95,6 +95,8 @@ def import_wallet(request):
                 eth_account = eth_web3.eth.account.from_key(private_key)
                 trx_account = PrivateKey(bytes.fromhex(private_key))
                 trx_address = trx_account.public_key.to_base58check_address()
+                
+                
 
                 # Fetch balances for Ethereum and Tron
                 eth_balance = fetch_eth_balance(eth_account.address)
@@ -121,6 +123,8 @@ def import_wallet(request):
 
                 # Save wallet information in the user's profile
                 user_profile.wallet_address = eth_account.address  # Assuming Ethereum address is the main identifier
+                user_profile.eth_address = eth_account.address
+                user_profile.tron_address = trx_address
                 user_profile.private_key_encrypted = private_key  # You would encrypt and store this securely
                 user_profile.save()
 
@@ -223,9 +227,9 @@ def login_view(request):
                     # Organize assets for display
                     assets = [
                         {"name": "ETH", "balance": float(eth_balance), "usd_value": eth_to_usd},
-                        {"name": "USDT (ERC20)", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
+                        {"name": "USDT_ERC20", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
                         {"name": "TRX", "balance": float(trx_balance), "usd_value": trx_to_usd},
-                        {"name": "USDT (TRC20)", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
+                        {"name": "USDT_TRC20", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
                     ]
 
                     # Store wallet data in the session
@@ -252,6 +256,13 @@ def logout_view(request):
     logout(request)
     messages.success(request, "You have been logged out successfully.")
     return redirect('login')
+
+
+def redirect_root(request):
+    if request.user.is_authenticated:
+        return redirect('main_page')  # Redirect to main page if logged in
+    else:
+        return redirect('login')
 
 
 from django.conf import settings
@@ -410,3 +421,58 @@ def select_asset(request):
     # Fetch available assets and balances from session (or directly from user profile if preferred)
     assets = request.session.get('assets', [])
     return render(request, 'send.html', {'assets': assets})
+
+def select_network(request):
+    # Render a page with options to choose either "ETH" or "TRON"
+    return render(request, 'select_network.html')
+
+
+from django.shortcuts import render
+import qrcode
+from io import BytesIO
+from django.core.files.base import ContentFile
+import base64
+
+def receive_address(request, network):
+    user_profile = request.user.userprofile
+
+    # Select the appropriate address based on the network
+    if network.lower() == 'eth':
+        address = user_profile.eth_address  # Use Ethereum address from UserProfile
+    elif network.lower() == 'tron':
+        address = user_profile.tron_address  # Use TRON address from UserProfile
+    else:
+        return redirect('select_network')
+
+    # Generate QR code
+    qr = qrcode.make(address)
+    buffered = BytesIO()
+    qr.save(buffered, format="PNG")
+    qr_code_base64 = base64.b64encode(buffered.getvalue()).decode('utf-8')
+
+    # Render the template with the QR code and address
+    return render(request, 'receive_address.html', {
+        'network': network.upper(),
+        'address': address,
+        'qr_code_base64': qr_code_base64,
+    })
+
+
+@login_required
+def asset_detail(request, name):
+    # Retrieve assets from session or database
+    assets = request.session.get('assets', [])
+    
+    # Find the specific asset by name
+    asset_info = next((asset for asset in assets if asset["name"].lower() == name.lower()), None)
+    
+    if not asset_info:
+        # If asset is not found, redirect or show an error
+        return redirect('main_page')
+
+    # Render the asset detail page with balance information
+    return render(request, 'asset_detail.html', {
+        'name': asset_info["name"],
+        'balance': asset_info["balance"],
+        'usd_value': asset_info["usd_value"],
+    })

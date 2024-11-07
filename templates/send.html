@@ -2,18 +2,25 @@
 <!DOCTYPE html>
 <html lang="en">
 	<head>
-    <title>Main Page</title>
+    <title>Send</title>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<meta http-equiv="X-UA-Compatible" content="ie=edge">
 		{% tailwind_css %}
 	</head>
-    <body class="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
+    <body class="bg-gray-900 text-white min-h-screen flex justify-between">
+         <!-- Header Component: Return and Home Icons -->
+   <header class="w-full max-w-md mx-auto flex items-center justify-between px-4 py-6 mb-4 fixed top-0">
+    <!-- Return Button (Back Icon) -->
+    <button onclick="history.back()" class="text-white hover:text-white flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+    </button>
+    </header>
         
-<div class="max-w-2xl mx-auto py-8">
-    <h1 class="text-3xl font-bold text-center text-white mb-6">Select an Asset to Send</h1>
-
-    <!-- Asset List Container -->
+<div class="max-w-2xl mx-auto py-20">
+  
     <div class="space-y-4">
         {% for asset in assets %}
         <div class="bg-gray-800 rounded-lg p-6 shadow-md transition transform hover:scale-105 hover:shadow-lg">
