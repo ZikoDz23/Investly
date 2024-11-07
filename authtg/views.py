@@ -116,9 +116,9 @@ def import_wallet(request):
                 # Organize assets for display
                 assets = [
                     {"name": "ETH", "balance": float(eth_balance), "usd_value": eth_to_usd},
-                    {"name": "USDT (ERC20)", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
+                    {"name": "USDT_ERC20", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
                     {"name": "TRX", "balance": float(trx_balance), "usd_value": trx_to_usd},
-                    {"name": "USDT (TRC20)", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
+                    {"name": "USDT_TRC20", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
                 ]
 
                 # Save wallet information in the user's profile
@@ -281,7 +281,7 @@ def send_eth(private_key, receiver_address, amount):
         'chainId': 1
     }
     signed_tx = eth_web3.eth.account.sign_transaction(transaction, private_key)
-    tx_hash = eth_web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    tx_hash = eth_web3.eth.send_raw_transaction(signed_tx.raw_transaction)
     return eth_web3.to_hex(tx_hash)
 
 def send_erc20(private_key, receiver_address, amount, token_address):
@@ -297,7 +297,7 @@ def send_erc20(private_key, receiver_address, amount, token_address):
         'nonce': nonce
     })
     signed_tx = eth_web3.eth.account.sign_transaction(transaction, private_key)
-    tx_hash = eth_web3.eth.send_raw_transaction(signed_tx.rawTransaction)
+    tx_hash = eth_web3.eth.send_raw_transaction(signed_tx.raw_transaction)
     return eth_web3.to_hex(tx_hash)
 
 from decimal import Decimal
@@ -325,16 +325,26 @@ def send_trx(private_key, receiver_address, amount):
 
 
 def send_trc20(private_key, receiver_address, amount, token_address):
+    # Initialize the account from the private key
     account = PrivateKey(bytes.fromhex(private_key))
+    sender_address = account.public_key.to_base58check_address()  # Derive sender's address from the public key
+    
+    # Convert the amount to SUN (TRC20 uses 1 TRX = 1e6 SUN)
+    amount_in_sun = int(Decimal(amount) * Decimal('1e6'))
+
+    # Fetch the TRC20 contract for the given token address
     contract = tron_client.get_contract(token_address)
-    amount_in_sun = int(amount * 1e6)
+
+    # Prepare and sign the transaction for transferring TRC20 tokens
     txn = (
         contract.functions.transfer(receiver_address, amount_in_sun)
-        .with_owner(account.address)
-        .fee_limit(1_000_000)
+        .with_owner(sender_address)  # Set sender's address as the owner of the transaction
+        .fee_limit(1_000_000)  # Set the transaction fee limit in SUN
         .build()
-        .sign(account)
+        .sign(account)  # Sign with the account's private key
     )
+    
+    # Broadcast the transaction and get the transaction ID
     tx_hash = txn.broadcast().txid
     return tx_hash
 
