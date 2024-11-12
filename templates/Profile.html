@@ -1,0 +1,97 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    {% tailwind_css %}
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+
+    <!-- Header Section with User Info -->
+    <header class="w-full max-w-2xl mx-auto px-6 py-8 flex items-center justify-between fixed top-0 left-0 right-0 bg-gray-900 shadow-lg z-10">
+        <!-- User Info Section -->
+        <div class="flex items-center space-x-4">
+            <button onclick="history.back()" class="text-white hover:text-blue-400 transition duration-200 flex items-center space-x-2">
+                <!-- Left Arrow SVG Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                </svg>
+                
+            </button>
+            <div class="w-12 h-12 bg-gray-700 rounded-full flex items-center justify-center">
+                <!-- Placeholder for user profile icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14c1.656 0 3 1.343 3 3v1H9v-1c0-1.657 1.344-3 3-3zm0-6a3 3 0 100 6 3 3 0 000-6z"/>
+                </svg>
+            </div>
+            <!-- Display Username -->
+            <h1 class="text-3xl font-semibold">{{ request.user.username }}</h1>
+        </div>
+        <!-- Optional Notification Icon -->
+        <div class="text-gray-400 hover:text-blue-500">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14V11c0-2.486-1.507-4.64-3.688-5.481A3 3 0 0012 3a3 3 0 00-2.312 1.519C7.507 6.36 6 8.514 6 11v3c0 .379-.214.725-.595.895L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow pt-32 px-6 space-y-6 max-w-2xl mx-auto">
+        <!-- Profile Options List -->
+        <ul class="space-y-4">
+            <!-- Backup Keys Option -->
+            <li>
+                <a href="" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-150">
+                    <span class="text-lg font-medium">Backup Keys</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </li>
+
+            <!-- Account Management Option -->
+            <li>
+                <a href="" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-150">
+                    <span class="text-lg font-medium">Account Management</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </li>
+
+            <!-- Invite Friends Option -->
+            <li>
+                <a href="" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-150">
+                    <span class="text-lg font-medium">Invite Friends</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </li>
+
+            <!-- Contact Us Option -->
+            <li>
+                <a href="" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-150">
+                    <span class="text-lg font-medium">Contact Us</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </li>
+
+            <!-- Logout Option -->
+            <li>
+                <a href="{% url 'logout' %}" class="flex items-center justify-between p-4 bg-gray-800 rounded-lg hover:bg-gray-700 transition duration-150">
+                    <span class="text-lg font-medium text-red-400">Logout</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </main>
+
+</body>
+</html>

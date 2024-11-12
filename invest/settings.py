@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'authtg',
     'tailwind',
     'theme',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

@@ -1,58 +1,46 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en">
-	<head>
+<head>
     <title>Main Page</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta http-equiv="X-UA-Compatible" content="ie=edge">
-		{% tailwind_css %}
-	</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% tailwind_css %}
+</head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col justify-between">
-
-  <!-- Top Navbar -->
-<nav class=" items-center p-4 bg-gray-800 shadow-lg text-white">
-    <div class="flex items-center justify-between">
-        <!-- Profile Icon -->
-        <div class=" bg-white rounded-full flex items-center justify-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200 px-1 py-1">
-                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-                    <g id="Dribbble-Light-Preview" transform="translate(-140.000000, -2159.000000)" fill="#000000">
-                        <g id="icons" transform="translate(56.000000, 160.000000)">
-                            <path d="M100.562548,2016.99998 L87.4381713,2016.99998 C86.7317804,2016.99998 86.2101535,2016.30298 86.4765813,2015.66198 C87.7127655,2012.69798 90.6169306,2010.99998 93.9998492,2010.99998 C97.3837885,2010.99998 100.287954,2012.69798 101.524138,2015.66198 C101.790566,2016.30298 101.268939,2016.99998 100.562548,2016.99998 M89.9166645,2004.99998 C89.9166645,2002.79398 91.7489936,2000.99998 93.9998492,2000.99998 C96.2517256,2000.99998 98.0830339,2002.79398 98.0830339,2004.99998 C98.0830339,2007.20598 96.2517256,2008.99998 93.9998492,2008.99998 C91.7489936,2008.99998 89.9166645,2007.20598 89.9166645,2004.99998 M103.955674,2016.63598 C103.213556,2013.27698 100.892265,2010.79798 97.837022,2009.67298 C99.4560048,2008.39598 100.400241,2006.33098 100.053171,2004.06998 C99.6509769,2001.44698 97.4235996,1999.34798 94.7348224,1999.04198 C91.0232075,1998.61898 87.8750721,2001.44898 87.8750721,2004.99998 C87.8750721,2006.88998 88.7692896,2008.57398 90.1636971,2009.67298 C87.1074334,2010.79798 84.7871636,2013.27698 84.044024,2016.63598 C83.7745338,2017.85698 84.7789973,2018.99998 86.0539717,2018.99998 L101.945727,2018.99998 C103.221722,2018.99998 104.226185,2017.85698 103.955674,2016.63598" />
-                        </g>
-                    </g>
-                </g>
-            </svg>
-        </div>
-
-        <!-- Notifications Icon -->
-        <div class="flex items-center justify-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200">
-                <path fill-rule="evenodd" clip-rule="evenodd" d="M6.31317 12.463C6.20006 9.29213 8.60976 6.6252 11.701 6.5C14.7923 6.6252 17.202 9.29213 17.0889 12.463C17.0889 13.78 18.4841 15.063 18.525 16.383C18.525 16.4017 18.525 16.4203 18.525 16.439C18.5552 17.2847 17.9124 17.9959 17.0879 18.029H13.9757C13.9786 18.677 13.7404 19.3018 13.3098 19.776C12.8957 20.2372 12.3123 20.4996 11.701 20.4996C11.0897 20.4996 10.5064 20.2372 10.0923 19.776C9.66161 19.3018 9.42346 18.677 9.42635 18.029H6.31317C5.48869 17.9959 4.84583 17.2847 4.87602 16.439C4.87602 16.4203 4.87602 16.4017 4.87602 16.383C4.91795 15.067 6.31317 13.781 6.31317 12.463Z"/>
-            </svg>
-        </div>
-    </div>
-</nav>
-
-
 
     <!-- Main Content -->
     <main class="flex-grow p-4 space-y-6">
-        
-        <!-- Balance Card -->
-        <div class="bg-gray-800 rounded-lg p-6 text-center shadow-md">
-            <h2 class="text-2xl font-bold">Balance</h2>
-            <p class="text-3xl font-semibold mt-2">${{ total_balance_usd }}</p>
+
+        <!-- Wallet Header with Balance -->
+        <div class="bg-blue-700 rounded-lg p-6 text-center shadow-lg">
+            <h2 class="text-3xl font-bold">TRX Wallet</h2>
+            <p class="text-4xl font-semibold mt-2">{{ assets.0.balance }} TRX</p> <!-- Display the main asset balance -->
+            <p class="text-lg mt-1">${{ total_balance_usd }}</p> <!-- Display the total USD value -->
+
+            <!-- Wallet Address and Copy Icon -->
+            <div class="flex items-center justify-center mt-4 text-gray-300 space-x-2">
+                <p class="text-xs">{{ user_profile.wallet_address }}</p> <!-- Show the wallet address -->
+                <button onclick="copyToClipboard('{{ user_profile.wallet_address }}')" class="hover:text-white">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M19 2H8c-1.103 0-2 .897-2 2v11c0 1.103.897 2 2 2h2v5h9c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zM8 4h11l.002 13H10v-5H8V4z"/>
+                    </svg>
+                </button>
+            </div>
 
             <!-- Receive and Send Buttons -->
             <div class="flex justify-center space-x-4 mt-6">
-                <a href="../receive/"><button class="w-32 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    Receive
-                </button></a>
-                <a href="../send/"><button class="w-32 bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    Send
-                </button></a>
+                <a href="../receive/" class="w-32">
+                    <button class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        Receive
+                    </button>
+                </a>
+                <a href="../send/" class="w-32">
+                    <button class="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        Send
+                    </button>
+                </a>
             </div>
         </div>
 
@@ -61,71 +49,70 @@
             <h3 class="text-xl font-semibold mb-3">Assets</h3>
             <ul class="space-y-2">
                 {% for asset in assets %}
-                
                 <li>
                     <a href="../asset/{{ asset.name }}/">
-                <div class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-md">
-                    <div>
-                        <p class="text-lg font-medium">{{ asset.name }}</p>
-                        <p class="text-sm text-gray-400">Balance: {{ asset.balance }}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-lg font-semibold">${{ asset.usd_value }}</p>
-                    </div>
-                </div>
-                </a>
+                        <div class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-md">
+                            <div>
+                                <p class="text-lg font-medium">{{ asset.name }}</p>
+                                <p class="text-sm text-gray-400">Balance: {{ asset.balance }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-semibold">${{ asset.usd_value }}</p>
+                            </div>
+                        </div>
+                    </a>
                 </li>
-                
                 {% endfor %}
             </ul>
         </div>
 
     </main>
-     <!-- Bottom Navigation -->
-<nav class="fixed bottom-0 left-0 w-full bg-gray-800 py-3 shadow-lg">
-    <div class="flex justify-around items-center text-white">
-        
-        <!-- Main Icon -->
-        <div class="text-center flex flex-col items-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200">
-                <g id="Interface / Main_Component">
-                    <g id="Vector">
-                        <!-- Main icon path here -->
-                    </g>
-                </g>
-            </svg>
-            <p class="text-xs mt-1">Main</p>
-        </div>
-        
-        <!-- Plans Icon -->
-        <div class="text-center flex flex-col items-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="-20 0 190 190" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200">
-                <path d="..." />
-            </svg>
-            <p class="text-xs mt-1">Plans</p>
-        </div>
 
-        <!-- Referrals Icon -->
-        <div class="text-center flex flex-col items-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="0 -6 44 44" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200">
-                <path d="..." />
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-gray-800 text-gray-400 shadow-md flex justify-around items-center py-2 w-full">
+        <!-- Assets Tab -->
+        <a href="" class="flex flex-col items-center text-white">
+            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 11-10 10A10 10 0 0112 2zm1 14.5h-2v-6h2zm0-8h-2V7h2z"/>
             </svg>
-            <p class="text-xs mt-1">Referrals</p>
-        </div>
+            <span class="text-xs font-semibold">Assets</span>
+        </a>
 
-        <!-- Settings Icon -->
-        <div class="text-center flex flex-col items-center hover:text-blue-500 transition duration-200">
-            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" class="hover:scale-110 transform transition duration-200">
-                <path d="..." />
+        <!-- Markets Tab -->
+        <a href="" class="flex flex-col items-center">
+            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 12l2-2V7.4a1.4 1.4 0 011.4-1.4h11.2a1.4 1.4 0 011.4 1.4V10l2 2v7.4a1.4 1.4 0 01-1.4 1.4H5.4A1.4 1.4 0 014 19.4V12z"/>
             </svg>
-            <p class="text-xs mt-1">Settings</p>
-        </div>
-    </div>
-</nav>
+            <span class="text-xs font-semibold">Markets</span>
+        </a>
 
+        <!-- Discover Tab -->
+        <a href="" class="flex flex-col items-center">
+            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2a10 10 0 11-10 10A10 10 0 0112 2zm2.78 7.36l-4.54 4.54a1 1 0 01-1.42 0l-.29-.3a1 1 0 010-1.42l4.54-4.54a1 1 0 011.42 0l.29.3a1 1 0 010 1.42z"/>
+            </svg>
+            <span class="text-xs font-semibold">Discover</span>
+        </a>
 
+        <!-- Me Tab -->
+        <a href="../profile/" class="flex flex-col items-center">
+            <svg class="w-6 h-6 mb-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12a5 5 0 11-5 5 5 5 0 015-5zm0-10a5 5 0 11-5 5 5 5 0 015-5z"/>
+            </svg>
+            <span class="text-xs font-semibold">Profile</span>
+        </a>
+    </nav>
+
+    <!-- Optional JavaScript for Copy to Clipboard -->
+    <script>
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                alert("Wallet address copied to clipboard!");
+            }, function(err) {
+                console.error("Could not copy text: ", err);
+            });
+        }
+    </script>
 
 </body>
 </html>
-
-

@@ -1,5 +1,3 @@
-# views.py
-
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from web3 import Web3
@@ -8,6 +6,17 @@ from tronpy.providers import HTTPProvider
 from tronpy.keys import PrivateKey
 import requests
 from decimal import Decimal
+import qrcode
+from io import BytesIO
+from django.core.files.base import ContentFile
+import base64
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.conf import settings
+from .models import UserProfile
+
 
 # Set up Ethereum (ETH) connection
 eth_web3 = Web3(Web3.HTTPProvider('https://mainnet.infura.io/v3/bf28a0864caa4fa7bc364c205bec19b3'))
@@ -73,11 +82,7 @@ def fetch_trc20_balance(address, contract_address):
     balance = contract.functions.balanceOf(address)
     return Decimal(balance) / Decimal(10 ** 6)
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
-from decimal import Decimal
-from .models import UserProfile  # Assuming UserProfile is created as outlined before
+ # Assuming UserProfile is created as outlined before
 
 @login_required
 def import_wallet(request):
@@ -146,12 +151,6 @@ def main_page(request):
     assets = request.session.get('assets', [])
     return render(request, 'main_page.html', {'total_balance_usd': total_balance_usd, 'assets': assets})
 
-# views.py
-
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login
-from django.contrib import messages
 
 def register(request):
     if request.method == 'POST':
@@ -184,10 +183,6 @@ def register(request):
     
     return render(request, 'register.html')
 
-
-# views.py
-
-from django.contrib.auth import login, logout
 
 def login_view(request):
     if request.method == 'POST':
@@ -263,9 +258,6 @@ def redirect_root(request):
         return redirect('main_page')  # Redirect to main page if logged in
     else:
         return redirect('login')
-
-
-from django.conf import settings
 
 
 
@@ -348,6 +340,35 @@ def send_trc20(private_key, receiver_address, amount, token_address):
     tx_hash = txn.broadcast().txid
     return tx_hash
 
+def update_session_balances(request, eth_account_address, trx_address):
+    # Re-fetch balances for Ethereum and Tron assets
+    eth_balance = fetch_eth_balance(eth_account_address)
+    usdt_eth_balance = fetch_erc20_balance(eth_account_address, '0xdac17f958d2ee523a2206206994597c13d831ec7')
+    trx_balance = fetch_trx_balance(trx_address)
+    usdt_trx_balance = fetch_trc20_balance(trx_address, 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t')
+
+    # Convert balances to USD
+    eth_to_usd = float(Decimal(eth_balance) * get_usd_price("ethereum"))
+    usdt_eth_to_usd = float(Decimal(usdt_eth_balance) * get_usd_price("tether"))
+    trx_to_usd = float(Decimal(trx_balance) * get_usd_price("tron"))
+    usdt_trx_to_usd = float(Decimal(usdt_trx_balance) * get_usd_price("tether"))
+
+    # Calculate total balance in USD
+    total_balance_usd = eth_to_usd + usdt_eth_to_usd + trx_to_usd + usdt_trx_to_usd
+
+    # Update assets data
+    assets = [
+        {"name": "ETH", "balance": float(eth_balance), "usd_value": eth_to_usd},
+        {"name": "USDT_ERC20", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
+        {"name": "TRX", "balance": float(trx_balance), "usd_value": trx_to_usd},
+        {"name": "USDT_TRC20", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
+    ]
+
+    # Store the updated balances and assets in the session
+    request.session['total_balance_usd'] = total_balance_usd
+    request.session['assets'] = assets
+
+
 
 
 @login_required
@@ -366,12 +387,20 @@ def send_asset(request, asset_type):
     trx_balance = fetch_trx_balance(trx_address)
     usdt_trx_balance = fetch_trc20_balance(trx_address, 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t')
 
-    # Available balances
+    # Define fee requirements for each asset type
+    fee_reserve = {
+        "eth": Decimal('0.001'),           # ETH reserve for gas
+        "usdt_erc20": Decimal('0.001'),    # ETH reserve for ERC20 gas
+        "trx": Decimal('1'),               # TRX reserve for TRX transaction fees
+        "usdt_trc20": Decimal('29'),        # TRX reserve for TRC20 transaction fees
+    }
+
+    # Available balances after reserving fees
     balances = {
-        "eth": Decimal(eth_balance),
-        "usdt_erc20": Decimal(usdt_eth_balance),
-        "trx": Decimal(trx_balance),
-        "usdt_trc20": Decimal(usdt_trx_balance),
+        "eth": max(Decimal(eth_balance) - fee_reserve["eth"], Decimal(0)),
+        "usdt_erc20": Decimal(usdt_eth_balance),  # USDT ERC20 relies on ETH balance for gas
+        "trx": max(Decimal(trx_balance) - fee_reserve["trx"], Decimal(0)),
+        "usdt_trc20": max(Decimal(usdt_trx_balance) - fee_reserve["usdt_trc20"], Decimal(0)),
     }
 
     # Validate the asset type
@@ -379,7 +408,7 @@ def send_asset(request, asset_type):
         messages.error(request, "Invalid asset type.")
         return redirect('select_asset')
 
-    # Retrieve the max amount available for the specified asset
+    # Retrieve the max amount available for the specified asset, after reserving for fees
     max_amount = balances[asset_type]
 
     if request.method == 'POST':
@@ -393,7 +422,7 @@ def send_asset(request, asset_type):
             return redirect('send_asset', asset_type=asset_type)
 
         if amount > max_amount:
-            messages.error(request, f"Amount exceeds available balance of {max_amount} {asset_type.upper()}.")
+            messages.error(request, f"Amount exceeds available balance of {max_amount} {asset_type.upper()}, taking transaction fees into account.")
             return redirect('send_asset', asset_type=asset_type)
 
         try:
@@ -411,6 +440,9 @@ def send_asset(request, asset_type):
             else:
                 raise ValueError("Unsupported asset type")
 
+            # Update balances in session after sending the asset
+            update_session_balances(request, eth_account.address, trx_address)
+
             # Success message with transaction details
             messages.success(request, f"Successfully sent {amount} {asset_type.upper()} to {receiver_address}. Transaction ID: {tx_hash}")
             return redirect('main_page')
@@ -426,6 +458,8 @@ def send_asset(request, asset_type):
 
 
 
+
+
 @login_required
 def select_asset(request):
     # Fetch available assets and balances from session (or directly from user profile if preferred)
@@ -437,11 +471,7 @@ def select_network(request):
     return render(request, 'select_network.html')
 
 
-from django.shortcuts import render
-import qrcode
-from io import BytesIO
-from django.core.files.base import ContentFile
-import base64
+
 
 def receive_address(request, network):
     user_profile = request.user.userprofile
@@ -486,3 +516,24 @@ def asset_detail(request, name):
         'balance': asset_info["balance"],
         'usd_value': asset_info["usd_value"],
     })
+
+
+@login_required
+def profile(request):
+    """
+    Renders the profile page for the authenticated user, including wallet and profile information.
+    """
+    # Fetch the authenticated user's profile
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    # Context to pass to the template
+    context = {
+        "username": request.user.username,
+        "wallet_address": user_profile.wallet_address,
+        "eth_address": user_profile.eth_address,
+        "tron_address": user_profile.tron_address,
+        # Additional options for the profile page menu
+        
+    }
+
+    return render(request, "profile.html", context)

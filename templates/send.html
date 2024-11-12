@@ -1,41 +1,56 @@
 {% load static tailwind_tags %}
 <!DOCTYPE html>
 <html lang="en">
-	<head>
+<head>
     <title>Send</title>
-		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<meta http-equiv="X-UA-Compatible" content="ie=edge">
-		{% tailwind_css %}
-	</head>
-    <body class="bg-gray-900 text-white min-h-screen flex justify-between">
-         <!-- Header Component: Return and Home Icons -->
-   <header class="w-full max-w-md mx-auto flex items-center justify-between px-4 py-6 mb-4 fixed top-0">
-    <!-- Return Button (Back Icon) -->
-    <button onclick="history.back()" class="text-white hover:text-white flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-    </button>
-    </header>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% tailwind_css %}
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
+
+    <!-- Header Component: Go Back Button with Arrow -->
+    <header class="w-full max-w-2xl mx-auto flex items-center justify-start px-4 py-4 fixed top-0 left-0 right-0 bg-gray-900 shadow-lg z-10">
+        <!-- Go Back Button with Arrow Icon -->
+        <button onclick="history.back()" class="text-white hover:text-blue-400 transition duration-200 flex items-center space-x-2">
+            <!-- Left Arrow SVG Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            
+        </button>
+        <!-- Page Title -->
         
-<div class="max-w-2xl mx-auto py-20">
-  
-    <div class="space-y-4">
-        {% for asset in assets %}
-        <div class="bg-gray-800 rounded-lg p-6 shadow-md transition transform hover:scale-105 hover:shadow-lg">
-            <h2 class="text-xl font-semibold text-white">{{ asset.name }}</h2>
-            <p class="text-gray-400 mt-2">Balance: <span class="text-white font-medium">{{ asset.balance }}</span></p>
-            <p class="text-gray-400">USD Value: <span class="text-green-400 font-medium">${{ asset.usd_value }}</span></p>
-            <a href="{% url 'send_asset' asset.name|lower %}" 
-               class="mt-4 inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400">
-               Send {{ asset.name }}
-            </a>
+    </header>
+
+    <!-- Content Wrapper with Responsive Spacing -->
+    <div class="max-w-2xl w-full mx-auto px-4 pt-24 pb-6">
+        <div class="space-y-6">
+            {% for asset in assets %}
+            <div class="bg-gray-800 rounded-lg p-6 shadow-md hover:shadow-lg transition duration-200 transform hover:scale-105">
+                <!-- Asset Name and Balance -->
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xl font-semibold">{{ asset.name }}</h2>
+                    <span class="text-sm text-gray-400">Balance: <span class="text-white font-medium">{{ asset.balance }}</span></span>
+                </div>
+                
+                <!-- Asset USD Value -->
+                <p class="text-gray-400 mt-1">USD Value: 
+                    <span class="text-green-400 font-semibold">${{ asset.usd_value }}</span>
+                </p>
+                
+                <!-- Send Button -->
+                <a href="{% url 'send_asset' asset.name|lower %}" 
+                   class="mt-4 inline-block bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500 transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-400 w-full text-center">
+                   Send {{ asset.name }}
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
-</div>
 
 </body>
+</html>
 
 

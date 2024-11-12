@@ -7,22 +7,25 @@
     <title>{{ name }} Balance</title>
     {% tailwind_css %}
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex justify-between">
+<body class="bg-gray-900 text-white min-h-screen flex flex-col">
 
-  <!-- Header Component: Return and Home Icons -->
-  <header class="w-full max-w-md mx-auto flex items-center justify-between px-4 py-6 mb-4 fixed top-0">
-    <!-- Return Button (Back Icon) -->
-    <button onclick="history.back()" class="text-white hover:text-white flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-        </svg>
-    </button>
-</header>
+    <!-- Header Component: Go Back Button -->
+    <header class="w-full max-w-2xl mx-auto flex items-center justify-start px-4 py-6 fixed top-0 left-0 right-0 bg-gray-900 shadow-lg z-10">
+        <!-- Go Back Button with Arrow Icon -->
+        <button onclick="history.back()" class="text-white hover:text-blue-400 transition duration-200 flex items-center space-x-2">
+            <!-- Left Arrow SVG Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+            <span class="text-lg font-semibold">Go Back</span>
+        </button>
+    </header>
 
-    <!-- Main Content (Asset Card) -->
-    <main class="flex-grow pt-20 px-4">
+    <!-- Main Content Wrapper -->
+    <main class="flex-grow pt-24 px-4 space-y-8">
+
         <!-- Balance Card -->
-        <div class="bg-gray-800 rounded-lg p-6 text-center shadow-md max-w-md mx-auto mt-4">
+        <div class="bg-gray-800 rounded-lg p-6 text-center shadow-md max-w-md mx-auto">
             <h2 class="text-2xl font-bold mb-2">{{ name }} Balance</h2>
             <p class="text-3xl font-semibold text-green-400 mt-2">${{ usd_value }}</p>
 
@@ -31,7 +34,7 @@
                 <p class="text-gray-400 text-lg">Balance: <span class="text-white font-medium">{{ balance }}</span></p>
                 <p class="text-gray-400 text-lg">Equivalent in USD: <span class="text-green-400 font-medium">${{ usd_value }}</span></p>
             </div>
-            
+
             <!-- Actions: Send and Receive Buttons -->
             <div class="flex justify-center space-x-4">
                 <a href="{% url 'send_asset' name|lower %}" 
@@ -45,9 +48,35 @@
                 </a>
             </div>
         </div>
-    </main>
 
-    
+        <!-- Transaction History Section -->
+        <section class="max-w-md mx-auto space-y-4">
+            <h3 class="text-xl font-semibold mb-4">Transaction History</h3>
+            <div class="space-y-2">
+                {% for transaction in transactions %}
+                <div class="bg-gray-800 p-4 rounded-lg flex justify-between items-center shadow-md">
+                    <div>
+                        <p class="text-sm font-medium">
+                            {{ transaction.date }} - 
+                            <span class="{% if transaction.type == 'received' %}text-green-400{% else %}text-red-400{% endif %}">
+                                {{ transaction.type|title }}
+                            </span>
+                        </p>
+                        <p class="text-xs text-gray-400">{{ transaction.status }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-lg font-semibold {% if transaction.type == 'received' %}text-green-400{% else %}text-red-400{% endif %}">
+                            {% if transaction.type == 'received' %}+{% else %}-{% endif %}{{ transaction.amount }} {{ name }}
+                        </p>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-center text-gray-400">No transaction history available.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+    </main>
 
 </body>
 </html>

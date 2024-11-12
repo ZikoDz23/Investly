@@ -14,4 +14,5 @@ urlpatterns = [
     path('receive/', views.select_network, name='select_network'),
     path('receive/<str:network>/', views.receive_address, name='receive_address'),
     path('asset/<str:name>/', views.asset_detail, name='asset_detail'),
+    path('profile/', views.profile, name='profile')
 ]

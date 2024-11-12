@@ -14,9 +14,22 @@
 
         <!-- Messages Section -->
         {% if messages %}
-            <div class="mb-4">
+            <div class="space-y-4">
                 {% for message in messages %}
-                    <p class="text-sm text-center bg-red-700 text-red-100 py-2 px-3 rounded mb-2">{{ message }}</p>
+                    <div class="
+                        p-4 rounded-lg shadow-md
+                        {% if message.tags == 'success' %}
+                            bg-green-600 text-white
+                        {% elif message.tags == 'error' %}
+                            bg-red-600 text-white
+                        {% elif message.tags == 'info' %}
+                            bg-blue-600 text-white
+                        {% else %}
+                            bg-gray-800 text-white
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
                 {% endfor %}
             </div>
         {% endif %}
