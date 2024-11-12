@@ -34,6 +34,7 @@
             </div>
         {% endif %}
 
+        <!-- Traditional Login Form -->
         <form method="post" action="{% url 'login' %}" class="space-y-6">
             {% csrf_token %}
 
@@ -60,6 +61,21 @@
             </button>
         </form>
 
+        <!-- Divider for Alternative Login Methods -->
+        <div class="text-center my-4">
+            <p class="text-gray-400">Or login with</p>
+        </div>
+
+        <!-- Telegram Login Button -->
+        <div class="flex justify-center mb-6">
+            <script async src="https://telegram.org/js/telegram-widget.js?7"
+                    data-telegram-login="investzhbot"
+                    data-size="large"
+                    data-auth-url="{% url 'telegram_login_callback' %}"
+                    data-request-access="write">
+            </script>
+        </div>
+
         <!-- Register Link -->
         <p class="text-center text-sm mt-6">
             Don't have an account? 
@@ -69,3 +85,4 @@
 
 </body>
 </html>
+

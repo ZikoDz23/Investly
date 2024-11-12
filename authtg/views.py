@@ -49,12 +49,43 @@ ERC20_ABI = [
 ]
 
 
+
 def get_usd_price(symbol):
-    # Example of fetching price from an API
-    url = f"https://api.coingecko.com/api/v3/simple/price?ids={symbol}&vs_currencies=usd"
-    response = requests.get(url)
-    data = response.json()
-    return Decimal(data[symbol]["usd"])
+    url = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest"
+    headers = {
+        "Accepts": "application/json",
+        "X-CMC_PRO_API_KEY": settings.COINMARKETCAP_API_KEY,
+    }
+    # Map the symbol to CoinMarketCap's IDs if necessary (e.g., Ethereum is 'ETH', Tether is 'USDT')
+    symbol_map = {
+        "ethereum": "ETH",
+        "tether": "USDT",
+        "tron": "TRX",
+    }
+    coin_symbol = symbol_map.get(symbol.lower(), symbol.upper())  # Defaults to symbol if not mapped
+    
+    params = {
+        "symbol": coin_symbol,
+        "convert": "USD"
+    }
+    try:
+        response = requests.get(url, headers=headers, params=params)
+        response.raise_for_status()
+        data = response.json()
+        
+        # Access the price from the API response
+        if coin_symbol in data["data"]:
+            return Decimal(data["data"][coin_symbol]["quote"]["USD"]["price"])
+        else:
+            raise ValueError(f"Price data for '{symbol}' not found in CoinMarketCap API response.")
+    except requests.RequestException as e:
+        # Handle network-related errors
+        raise ValueError(f"Failed to fetch price for '{symbol}': {str(e)}")
+    except (ValueError, KeyError) as e:
+        # Handle JSON structure issues or missing data
+        raise ValueError(f"Failed to fetch price for '{symbol}': {str(e)}")
+
+
 
 def fetch_eth_balance(address):
     balance = eth_web3.eth.get_balance(address)
@@ -537,3 +568,102 @@ def profile(request):
     }
 
     return render(request, "profile.html", context)
+
+import hashlib
+import hmac
+import time
+from django.conf import settings
+from django.shortcuts import redirect
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.http import HttpResponseBadRequest
+
+def verify_telegram_auth(data, bot_token):
+    """Verifies Telegram authentication data using SHA-256 HMAC."""
+    auth_data = {k: v for k, v in data.items() if k != 'hash'}
+    sorted_data_string = "\n".join(f"{k}={auth_data[k]}" for k in sorted(auth_data.keys()))
+    secret_key = hashlib.sha256(bot_token.encode()).digest()
+    calculated_hash = hmac.new(secret_key, sorted_data_string.encode(), hashlib.sha256).hexdigest()
+    return calculated_hash == data.get('hash')
+
+def telegram_login_callback(request):
+    data = request.GET
+    bot_token = settings.TELEGRAM_BOT_TOKEN
+
+    # Verify the request is from Telegram
+    if not verify_telegram_auth(data, bot_token):
+        return HttpResponseBadRequest("Invalid Telegram authentication")
+
+    # Check if the authentication data is not expired (more than 1 day old)
+    auth_date = int(data.get('auth_date'))
+    if time.time() - auth_date > 86400:
+        return HttpResponseBadRequest("Authentication expired")
+
+    # Extract user details from the Telegram data
+    telegram_id = data.get('id')
+    first_name = data.get('first_name')
+    last_name = data.get('last_name', '')
+    username = data.get('username')
+
+    # Find or create a user in Django based on Telegram ID
+    user, created = User.objects.get_or_create(username=f"telegram_{telegram_id}")
+    if created:
+        user.first_name = first_name
+        user.last_name = last_name
+        user.save()
+
+    # Ensure that a UserProfile is created for the user
+    user_profile, profile_created = UserProfile.objects.get_or_create(user=user)
+
+    # Log the user in
+    login(request, user)
+
+    # Check if the wallet is already imported
+    if user_profile.wallet_address and user_profile.private_key_encrypted:
+        # Attempt to load wallet details automatically
+        try:
+            private_key = user_profile.private_key_encrypted  # Decrypt if necessary
+
+            # Initialize Ethereum and Tron accounts
+            eth_account = Web3().eth.account.from_key(private_key)
+            trx_account = PrivateKey(bytes.fromhex(private_key))
+            trx_address = trx_account.public_key.to_base58check_address()
+
+            # Fetch Ethereum and Tron balances
+            eth_balance = fetch_eth_balance(eth_account.address)
+            usdt_eth_balance = fetch_erc20_balance(eth_account.address, '0xdac17f958d2ee523a2206206994597c13d831ec7')
+            trx_balance = fetch_trx_balance(trx_address)
+            usdt_trx_balance = fetch_trc20_balance(trx_address, 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t')
+
+            # Convert balances to USD
+            eth_to_usd = float(Decimal(eth_balance) * get_usd_price("ethereum"))
+            usdt_eth_to_usd = float(Decimal(usdt_eth_balance) * get_usd_price("tether"))
+            trx_to_usd = float(Decimal(trx_balance) * get_usd_price("tron"))
+            usdt_trx_to_usd = float(Decimal(usdt_trx_balance) * get_usd_price("tether"))
+
+            # Calculate total balance in USD
+            total_balance_usd = eth_to_usd + usdt_eth_to_usd + trx_to_usd + usdt_trx_to_usd
+
+            # Organize assets for display
+            assets = [
+                {"name": "ETH", "balance": float(eth_balance), "usd_value": eth_to_usd},
+                {"name": "USDT_ERC20", "balance": float(usdt_eth_balance), "usd_value": usdt_eth_to_usd},
+                {"name": "TRX", "balance": float(trx_balance), "usd_value": trx_to_usd},
+                {"name": "USDT_TRC20", "balance": float(usdt_trx_balance), "usd_value": usdt_trx_to_usd}
+            ]
+
+            # Store wallet data in the session
+            request.session['total_balance_usd'] = total_balance_usd
+            request.session['assets'] = assets
+
+            # Redirect to the main page with wallet loaded
+            return redirect('main_page')
+
+        except Exception as e:
+            messages.error(request, f"Failed to load wallet: {str(e)}")
+            return redirect('login')
+
+    # If no wallet, redirect to the import wallet page
+    messages.info(request, "Please import your wallet to continue.")
+    return redirect('import_wallet')

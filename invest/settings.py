@@ -122,7 +122,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = 'static/'
-
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
@@ -139,3 +139,5 @@ TAILWIND_APP_NAME = 'theme'
 
 
 NPM_BIN_PATH = "C:/Program Files/nodejs/npm.cmd"
+
+COINMARKETCAP_API_KEY ='b8bcf8bb-61cb-4cbc-a0a7-707fdaa02f85'
